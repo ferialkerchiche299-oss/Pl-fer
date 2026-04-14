@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Planner Pro</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b0b10;
+  color:white;
+}
+
+header{
+  background:#6a0dad;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.screen{display:none; padding:15px;}
+.active{display:block;}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  background:#111;
+}
+
+.nav button{
+  flex:1;
+  padding:15px;
+  border:none;
+  background:#111;
+  color:white;
+  font-size:18px;
+}
+
+.card{
+  background:rgba(106,13,173,0.25);
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+}
+
+input, select, textarea, button{
+  width:90%;
+  padding:10px;
+  margin:5px;
+}
+</style>
+</head>
+
+<body>
+
+<header id="title">💜 Planner Pro</header>
+
+<!-- 📋 TASKS -->
+<div id="tasks" class="screen active">
+
+<h3 id="taskTitle">📋 المهام</h3>
+
+<select id="type">
+  <option value="day">📅 يومي</option>
+  <option value="week">📆 أسبوعي</option>
+  <option value="month">🗓️ شهري</option>
+  <option value="year">📊 سنوي</option>
+</select>
+
+<input id="name" placeholder="اسم المهمة">
+
+<div id="dynamic"></div>
+
+<button onclick="createFields()">➡️ متابعة</button>
+
+<div id="list"></div>
+
+</div>
+
+<!-- 📝 NOTES -->
+<div id="notes" class="screen">
+
+<h3 id="noteTitle">📝 النوت</h3>
+
+<textarea id="noteText" rows="5" placeholder="اكتب هنا..."></textarea>
+
+<button onclick="saveNote()">💾 حفظ</button>
+
+<div id="noteList"></div>
+
+</div>
+
+<!-- ⏰ TIMER -->
+<div id="timer" class="screen">
+
+<h3 id="timerTitle">⏰ المؤقت</h3>
+
+<input id="min" type="number" placeholder="الدقائق">
+
+<button onclick="startTimer()">ابدأ</button>
+
+<h2 id="count"></h2>
+
+</div>
+
+<!-- ⚙️ SETTINGS -->
+<div id="settings" class="screen">
+
+<h3 id="setTitle">⚙️ الإعدادات</h3>
+
+<p>🌍 اللغة</p>
+
+<select onchange="changeLang(this.value)">
+  <option value="ar">العربية</option>
+  <option value="fr">Français</option>
+  <option value="en">English</option>
+</select>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="show('tasks')">📋</button>
+  <button onclick="show('notes')">📝</button>
+  <button onclick="show('timer')">⏰</button>
+  <button onclick="show('settings')">⚙️</button>
+</div>
+
+<script>
+
+let tasks=[];
+let notes=[];
+let lang="ar";
+
+// 🌍 translations
+const T={
+  ar:{
+    title:"💜 منظم المهام",
+    tasks:"📋 المهام",
+    notes:"📝 النوت",
+    timer:"⏰ المؤقت",
+    settings:"⚙️ الإعدادات"
+  },
+  fr:{
+    title:"💜 Gestionnaire",
+    tasks:"📋 Tâches",
+    notes:"📝 Notes",
+    timer:"⏰ Minuteur",
+    settings:"⚙️ Paramètres"
+  },
+  en:{
+    title:"💜 Planner",
+    tasks:"📋 Tasks",
+    notes:"📝 Notes",
+    timer:"⏰ Timer",
+    settings:"⚙️ Settings"
+  }
+};
+
+// 🔀 NAV
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// 📋 STEP TASK
+function createFields(){
+
+  let type=document.getElementById("type").value;
+  let d=document.getElementById("dynamic");
+
+  if(type=="day"){
+    d.innerHTML=`
+      <input id="time" type="time">
+      <button onclick="saveTask()">تأكيد</button>
+    `;
+  }
+
+  if(type=="week"){
+    d.innerHTML=`
+      <select id="day">
+        <option>Monday</option>
+        <option>Tuesday</option>
+        <option>Wednesday</option>
+        <option>Thursday</option>
+        <option>Friday</option>
+        <option>Saturday</option>
+        <option>Sunday</option>
+      </select>
+      <input id="time" type="time">
+      <button onclick="saveTask()">تأكيد</button>
+    `;
+  }
+
+  if(type=="month"){
+    d.innerHTML=`
+      <input id="date" type="number" placeholder="يوم الشهر">
+      <input id="time" type="time">
+      <button onclick="saveTask()">تأكيد</button>
+    `;
+  }
+
+  if(type=="year"){
+    d.innerHTML=`
+      <input id="date" type="date">
+      <input id="time" type="time">
+      <button onclick="saveTask()">تأكيد</button>
+    `;
+  }
+}
+
+// 💾 SAVE TASK
+function saveTask(){
+
+  let name=document.getElementById("name").value;
+  let type=document.getElementById("type").value;
+
+  if(!name) return;
+
+  tasks.push({name,type});
+  renderTasks();
+}
+
+// 📋 SHOW TASKS
+function renderTasks(){
+  let list=document.getElementById("list");
+  list.innerHTML="";
+
+  tasks.forEach(t=>{
+    list.innerHTML+=`
+      <div class="card">
+        ${t.name} - ${t.type}
+      </div>
+    `;
+  });
+}
+
+// 📝 SAVE NOTE
+function saveNote(){
+  let n=document.getElementById("noteText").value;
+  if(!n) return;
+
+  notes.push(n);
+  document.getElementById("noteText").value="";
+  renderNotes();
+}
+
+// 📝 SHOW NOTES
+function renderNotes(){
+  let l=document.getElementById("noteList");
+  l.innerHTML="";
+
+  notes.forEach(n=>{
+    l.innerHTML+=`
+      <div class="card">${n}</div>
+    `;
+  });
+}
+
+// 🌍 CHANGE LANGUAGE
+function changeLang(l){
+  lang=l;
+
+  document.getElementById("title").innerText=T[l].title;
+  document.getElementById("taskTitle").innerText=T[l].tasks;
+  document.getElementById("noteTitle").innerText=T[l].notes;
+  document.getElementById("timerTitle").innerText=T[l].timer;
+  document.getElementById("setTitle").innerText=T[l].settings;
+}
+
+// ⏰ TIMER
+let interval;
+
+function startTimer(){
+  let m=document.getElementById("min").value;
+  let total=m*60;
+
+  clearInterval(interval);
+
+  interval=setInterval(()=>{
+    if(total<=0){
+      clearInterval(interval);
+      document.getElementById("count").innerText="⏰ انتهى الوقت";
+      return;
+    }
+
+    total--;
+    document.getElementById("count").innerText=total+" sec";
+  },1000);
+}
+
+</script>
+
+</body>
+</html>
