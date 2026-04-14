@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Smart Planner</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b0b10;
+  color:white;
+}
+
+header{
+  background:#6a0dad;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.screen{display:none; padding:15px;}
+.active{display:block;}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  background:#111;
+}
+
+.nav button{
+  flex:1;
+  padding:15px;
+  border:none;
+  background:#111;
+  color:white;
+  font-size:18px;
+}
+
+.card{
+  background:rgba(106,13,173,0.25);
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+}
+
+input, textarea, select, button{
+  width:90%;
+  padding:10px;
+  margin:5px;
+}
+</style>
+</head>
+
+<body>
+
+<header id="title">💜 Smart Planner</header>
+
+<!-- 📋 TASKS -->
+<div id="tasks" class="screen active">
+
+<h3>📋 المهام</h3>
+
+<input id="taskName" placeholder="اسم المهمة">
+<button onclick="addTask()">➕ إضافة</button>
+
+<div id="taskList"></div>
+
+</div>
+
+<!-- 📝 NOTES -->
+<div id="notes" class="screen">
+
+<h3>📝 النوت</h3>
+
+<textarea id="noteText" rows="5" placeholder="اكتب هنا..."></textarea>
+<button onclick="saveNote()">💾 حفظ</button>
+
+<div id="noteList"></div>
+
+</div>
+
+<!-- ⏰ TIMER -->
+<div id="timer" class="screen">
+
+<h3>⏰ المؤقت</h3>
+
+<input id="min" type="number" placeholder="الدقائق">
+<button onclick="startTimer()">ابدأ</button>
+
+<h2 id="count"></h2>
+
+</div>
+
+<!-- ⚙️ SETTINGS -->
+<div id="settings" class="screen">
+
+<h3>⚙️ الإعدادات</h3>
+
+<p>🌍 اللغة</p>
+<select onchange="changeLang(this.value)">
+  <option value="ar">العربية</option>
+  <option value="fr">Français</option>
+  <option value="en">English</option>
+</select>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="show('tasks')">📋</button>
+  <button onclick="show('notes')">📝</button>
+  <button onclick="show('timer')">⏰</button>
+  <button onclick="show('settings')">⚙️</button>
+</div>
+
+<script>
+
+let tasks=[];
+let notes=[];
+
+// 🔀 NAV
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// 📋 TASKS
+function addTask(){
+  let t=document.getElementById("taskName").value;
+  if(!t) return;
+
+  tasks.push(t);
+  document.getElementById("taskName").value="";
+  renderTasks();
+}
+
+function renderTasks(){
+  let list=document.getElementById("taskList");
+  list.innerHTML="";
+
+  tasks.forEach((t,i)=>{
+    list.innerHTML+=`
+      <div class="card">
+        ${t}
+        <button onclick="tasks.splice(${i},1); renderTasks()">❌</button>
+      </div>
+    `;
+  });
+}
+
+// 📝 NOTES
+function saveNote(){
+  let n=document.getElementById("noteText").value;
+  if(!n) return;
+
+  notes.push(n);
+  document.getElementById("noteText").value="";
+  renderNotes();
+}
+
+function renderNotes(){
+  let list=document.getElementById("noteList");
+  list.innerHTML="";
+
+  notes.forEach((n,i)=>{
+    list.innerHTML+=`
+      <div class="card">
+        ${n}
+        <button onclick="notes.splice(${i},1); renderNotes()">❌</button>
+      </div>
+    `;
+  });
+}
+
+// ⏰ TIMER
+let interval;
+
+function startTimer(){
+  let m=document.getElementById("min").value;
+  let total=m*60;
+
+  clearInterval(interval);
+
+  interval=setInterval(()=>{
+    if(total<=0){
+      clearInterval(interval);
+      document.getElementById("count").innerText="⏰ انتهى الوقت!";
+      return;
+    }
+
+    total--;
+    document.getElementById("count").innerText=total+" sec";
+  },1000);
+}
+
+// 🌍 LANGUAGE (بسيطة)
+function changeLang(l){
+  if(l=="fr") document.getElementById("title").innerText="💜 Gestionnaire";
+  if(l=="en") document.getElementById("title").innerText="💜 Planner";
+  if(l=="ar") document.getElementById("title").innerText="💜 منظم المهام";
+}
+
+</script>
+
+</body>
+                     </html>
